@@ -1,0 +1,253 @@
+{
+  "info": {
+    "_postman_id": "dce0acbf-505d-4b2c-a240-54397900350a",
+    "name": "RESTful API Demo - Products",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58381640",
+    "_collection_link": "https://go.postman.co/collection/58381640-dce0acbf-505d-4b2c-a240-54397900350a?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Tạo sản phẩm mới (POST)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Trạng thái trả về phải là 201 Created\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Dữ liệu trả về phải có mã định danh _id\", function () {\r\n    var jsonData = pm.response.json();\r\n    pm.expect(jsonData.data).to.have.property('_id');\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"name\": \"Chuột Gaming Logitech G102\",\r\n  \"price\": 200000,\r\n  \"quantity\": 5\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/products",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "products"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Tạo sản phẩm mới (POST)",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Bàn phím cơ DareU EK87\",\r\n  \"price\": 650000,\r\n  \"quantity\": 20\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/products",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "products"
+              ]
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "x-powered-by",
+              "value": "Express"
+            },
+            {
+              "key": "access-control-allow-origin",
+              "value": "*"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "content-length",
+              "value": "259"
+            },
+            {
+              "key": "etag",
+              "value": "W/\"103-VvgIg+VAM1GFIMk2AfHide9i448\""
+            },
+            {
+              "key": "date",
+              "value": "Sun, 20 Sep 2026 14:42:12 GMT"
+            },
+            {
+              "key": "connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "keep-alive",
+              "value": "timeout=5"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"message\": \"Tạo mới sản phẩm thành công!\",\n  \"data\": {\n    \"name\": \"Bàn phím cơ DareU EK87\",\n    \"price\": 650000,\n    \"quantity\": 20,\n    \"_id\": \"6aaff0c496a57f88baa5894c\",\n    \"createdAt\": \"2026-09-20T14:42:12.418Z\",\n    \"updatedAt\": \"2026-09-20T14:42:12.418Z\",\n    \"__v\": 0\n  }\n}"
+        },
+        {
+          "name": "Tạo sản phẩm mới (POST)",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Chuột Gaming Logitech G102\",\r\n  \"price\": -200000,\r\n  \"quantity\": 5\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/products",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "products"
+              ]
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "x-powered-by",
+              "value": "Express"
+            },
+            {
+              "key": "access-control-allow-origin",
+              "value": "*"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "content-length",
+              "value": "149"
+            },
+            {
+              "key": "etag",
+              "value": "W/\"95-b17B2t8PV+uGcJV3jtIA4u9SM2k\""
+            },
+            {
+              "key": "date",
+              "value": "Sun, 20 Sep 2026 14:50:20 GMT"
+            },
+            {
+              "key": "connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "keep-alive",
+              "value": "timeout=5"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"message\": \"Dữ liệu gửi lên không hợp lệ\",\n  \"error\": \"Product validation failed: price: Giá sản phẩm không thể âm\"\n}"
+        },
+        {
+          "name": "Tạo sản phẩm mới (POST)",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Chuột Gaming Logitech G102\",\r\n  \"price\": 200000,\r\n  \"quantity\": 5\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/products",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "products"
+              ]
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "x-powered-by",
+              "value": "Express"
+            },
+            {
+              "key": "access-control-allow-origin",
+              "value": "*"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "content-length",
+              "value": "261"
+            },
+            {
+              "key": "etag",
+              "value": "W/\"105-G8iAPwL5+aqvvFu1UgioJtXiXto\""
+            },
+            {
+              "key": "date",
+              "value": "Sun, 20 Sep 2026 14:51:56 GMT"
+            },
+            {
+              "key": "connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "keep-alive",
+              "value": "timeout=5"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"message\": \"Tạo mới sản phẩm thành công!\",\n  \"data\": {\n    \"name\": \"Chuột Gaming Logitech G102\",\n    \"price\": 200000,\n    \"quantity\": 5,\n    \"_id\": \"6aaff30c96a57f88baa5894e\",\n    \"createdAt\": \"2026-09-20T14:51:56.607Z\",\n    \"updatedAt\": \"2026-09-20T14:51:56.607Z\",\n    \"__v\": 0\n  }\n}"
+        }
+      ]
+    }
+  ]
+}
