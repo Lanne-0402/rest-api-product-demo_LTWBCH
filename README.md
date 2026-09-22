@@ -1,5 +1,5 @@
 ## Cấu trúc hệ thống
-
+```text
 ├── config/
 │   └── db.js            # Kết nối MongoDB Atlas qua Mongoose
 ├── models/
