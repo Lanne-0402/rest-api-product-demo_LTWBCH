@@ -2,250 +2,307 @@
   "info": {
     "_postman_id": "dce0acbf-505d-4b2c-a240-54397900350a",
     "name": "RESTful API Demo - Products",
+    "description": "Full CRUD demo cho buổi thuyết trình. Chạy theo thứ tự folder 01 → 02 → 03.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "58381640",
-    "_collection_link": "https://go.postman.co/collection/58381640-dce0acbf-505d-4b2c-a240-54397900350a?source=collection_link"
+    "_exporter_id": "58381640"
   },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "productId",
+      "value": ""
+    }
+  ],
   "item": [
     {
-      "name": "Tạo sản phẩm mới (POST)",
-      "event": [
+      "name": "01 - Create (POST)",
+      "item": [
         {
-          "listen": "prerequest",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Trạng thái trả về phải là 201 Created\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Dữ liệu trả về phải có mã định danh _id\", function () {\r\n    var jsonData = pm.response.json();\r\n    pm.expect(jsonData.data).to.have.property('_id');\r\n});"
-            ]
+          "name": "Tạo sản phẩm hợp lệ → 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201 Created\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Có trường _id\", () => pm.expect(pm.response.json().data).to.have.property('_id'));",
+                  "const id = pm.response.json().data._id;",
+                  "if (id) pm.collectionVariables.set('productId', id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bàn phím cơ DareU EK87\",\n  \"price\": 650000,\n  \"quantity\": 20\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/products"
+          }
+        },
+        {
+          "name": "Tạo sản phẩm – giá âm → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400 Bad Request\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"success = false\", () => pm.expect(pm.response.json().success).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Chuột Gaming Logitech G102\",\n  \"price\": -200000,\n  \"quantity\": 5\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/products"
           }
         }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"name\": \"Chuột Gaming Logitech G102\",\r\n  \"price\": 200000,\r\n  \"quantity\": 5\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+      ]
+    },
+    {
+      "name": "02 - Read (GET)",
+      "item": [
+        {
+          "name": "Lấy danh sách sản phẩm → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"data là mảng\", () => pm.expect(pm.response.json().data).to.be.an('array'));",
+                  "pm.test(\"Có trường count\", () => pm.expect(pm.response.json()).to.have.property('count'));",
+                  "// Lưu _id của sản phẩm đầu tiên nếu chưa có",
+                  "const data = pm.response.json().data;",
+                  "if (data && data.length && !pm.collectionVariables.get('productId')) {",
+                  "    pm.collectionVariables.set('productId', data[0]._id);",
+                  "}"
+                ]
+              }
             }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/products"
           }
         },
-        "url": {
-          "raw": "http://localhost:5000/api/products",
-          "protocol": "http",
-          "host": [
-            "localhost"
+        {
+          "name": "Lấy chi tiết 1 sản phẩm theo :id → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Đúng _id\", () => pm.expect(pm.response.json().data._id).to.eql(pm.collectionVariables.get('productId')));"
+                ]
+              }
+            }
           ],
-          "port": "5000",
-          "path": [
-            "api",
-            "products"
-          ]
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          }
+        },
+        {
+          "name": "Lấy sản phẩm – ID sai định dạng → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400 Bad Request\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/products/id-khong-hop-le"
+          }
+        },
+        {
+          "name": "Lấy sản phẩm – ID không tồn tại → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404 Not Found\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/products/000000000000000000000000"
+          }
         }
-      },
-      "response": [
+      ]
+    },
+    {
+      "name": "03 - Update (PATCH)",
+      "item": [
         {
-          "name": "Tạo sản phẩm mới (POST)",
-          "originalRequest": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"name\": \"Bàn phím cơ DareU EK87\",\r\n  \"price\": 650000,\r\n  \"quantity\": 20\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+          "name": "Cập nhật giá sản phẩm → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Giá đã được cập nhật\", () => pm.expect(pm.response.json().data.price).to.eql(750000));",
+                  "pm.test(\"Trả về dữ liệu MỚI (new: true)\", () => pm.expect(pm.response.json().data).to.have.property('updatedAt'));"
+                ]
               }
-            },
-            "url": {
-              "raw": "http://localhost:5000/api/products",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "5000",
-              "path": [
-                "api",
-                "products"
-              ]
-            }
-          },
-          "status": "Created",
-          "code": 201,
-          "_postman_previewlanguage": "json",
-          "header": [
-            {
-              "key": "x-powered-by",
-              "value": "Express"
-            },
-            {
-              "key": "access-control-allow-origin",
-              "value": "*"
-            },
-            {
-              "key": "content-type",
-              "value": "application/json; charset=utf-8"
-            },
-            {
-              "key": "content-length",
-              "value": "259"
-            },
-            {
-              "key": "etag",
-              "value": "W/\"103-VvgIg+VAM1GFIMk2AfHide9i448\""
-            },
-            {
-              "key": "date",
-              "value": "Sun, 20 Sep 2026 14:42:12 GMT"
-            },
-            {
-              "key": "connection",
-              "value": "keep-alive"
-            },
-            {
-              "key": "keep-alive",
-              "value": "timeout=5"
             }
           ],
-          "cookie": [],
-          "body": "{\n  \"success\": true,\n  \"message\": \"Tạo mới sản phẩm thành công!\",\n  \"data\": {\n    \"name\": \"Bàn phím cơ DareU EK87\",\n    \"price\": 650000,\n    \"quantity\": 20,\n    \"_id\": \"6aaff0c496a57f88baa5894c\",\n    \"createdAt\": \"2026-09-20T14:42:12.418Z\",\n    \"updatedAt\": \"2026-09-20T14:42:12.418Z\",\n    \"__v\": 0\n  }\n}"
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 750000\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          }
         },
         {
-          "name": "Tạo sản phẩm mới (POST)",
-          "originalRequest": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"name\": \"Chuột Gaming Logitech G102\",\r\n  \"price\": -200000,\r\n  \"quantity\": 5\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+          "name": "Cập nhật – giá âm → 400 (runValidators)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400 Bad Request\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Validator chặn giá âm\", () => pm.expect(pm.response.json().success).to.eql(false));"
+                ]
               }
-            },
-            "url": {
-              "raw": "http://localhost:5000/api/products",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "5000",
-              "path": [
-                "api",
-                "products"
-              ]
-            }
-          },
-          "status": "Bad Request",
-          "code": 400,
-          "_postman_previewlanguage": "json",
-          "header": [
-            {
-              "key": "x-powered-by",
-              "value": "Express"
-            },
-            {
-              "key": "access-control-allow-origin",
-              "value": "*"
-            },
-            {
-              "key": "content-type",
-              "value": "application/json; charset=utf-8"
-            },
-            {
-              "key": "content-length",
-              "value": "149"
-            },
-            {
-              "key": "etag",
-              "value": "W/\"95-b17B2t8PV+uGcJV3jtIA4u9SM2k\""
-            },
-            {
-              "key": "date",
-              "value": "Sun, 20 Sep 2026 14:50:20 GMT"
-            },
-            {
-              "key": "connection",
-              "value": "keep-alive"
-            },
-            {
-              "key": "keep-alive",
-              "value": "timeout=5"
             }
           ],
-          "cookie": [],
-          "body": "{\n  \"success\": false,\n  \"message\": \"Dữ liệu gửi lên không hợp lệ\",\n  \"error\": \"Product validation failed: price: Giá sản phẩm không thể âm\"\n}"
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": -1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          }
         },
         {
-          "name": "Tạo sản phẩm mới (POST)",
-          "originalRequest": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"name\": \"Chuột Gaming Logitech G102\",\r\n  \"price\": 200000,\r\n  \"quantity\": 5\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+          "name": "Cập nhật – ID không tồn tại → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404 Not Found\", () => pm.response.to.have.status(404));"
+                ]
               }
-            },
-            "url": {
-              "raw": "http://localhost:5000/api/products",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "5000",
-              "path": [
-                "api",
-                "products"
-              ]
-            }
-          },
-          "status": "Created",
-          "code": 201,
-          "_postman_previewlanguage": "json",
-          "header": [
-            {
-              "key": "x-powered-by",
-              "value": "Express"
-            },
-            {
-              "key": "access-control-allow-origin",
-              "value": "*"
-            },
-            {
-              "key": "content-type",
-              "value": "application/json; charset=utf-8"
-            },
-            {
-              "key": "content-length",
-              "value": "261"
-            },
-            {
-              "key": "etag",
-              "value": "W/\"105-G8iAPwL5+aqvvFu1UgioJtXiXto\""
-            },
-            {
-              "key": "date",
-              "value": "Sun, 20 Sep 2026 14:51:56 GMT"
-            },
-            {
-              "key": "connection",
-              "value": "keep-alive"
-            },
-            {
-              "key": "keep-alive",
-              "value": "timeout=5"
             }
           ],
-          "cookie": [],
-          "body": "{\n  \"success\": true,\n  \"message\": \"Tạo mới sản phẩm thành công!\",\n  \"data\": {\n    \"name\": \"Chuột Gaming Logitech G102\",\n    \"price\": 200000,\n    \"quantity\": 5,\n    \"_id\": \"6aaff30c96a57f88baa5894e\",\n    \"createdAt\": \"2026-09-20T14:51:56.607Z\",\n    \"updatedAt\": \"2026-09-20T14:51:56.607Z\",\n    \"__v\": 0\n  }\n}"
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 500000\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/products/000000000000000000000000"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Delete (DELETE)",
+      "item": [
+        {
+          "name": "Xóa sản phẩm → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"success = true\", () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          }
+        },
+        {
+          "name": "Xóa lại lần 2 → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404 Not Found\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          }
+        },
+        {
+          "name": "Xóa – ID sai định dạng → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400 Bad Request\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/products/id-khong-hop-le"
+          }
         }
       ]
     }
