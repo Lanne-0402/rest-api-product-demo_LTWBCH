@@ -43,6 +43,43 @@ router.post('/products', async (req, res) => {
 
 router.get('/products', async (req, res) => {
     try {
+        // Chặng 1: Nhận query params từ URL qua req.query
+        const { page, limit, minPrice } = req.query;
+
+        // Chặng 2: Kiểm tra dữ liệu đầu vào của query params
+        const positiveInteger = value => typeof value === 'string' && /^[1-9]\d*$/.test(value) && Number.isSafeInteger(Number(value));
+        if (page !== undefined && !positiveInteger(page)) {
+            return res.status(400).json({ success: false, message: 'page phải là số nguyên dương.' });
+        }
+        if (limit !== undefined && !positiveInteger(limit)) {
+            return res.status(400).json({ success: false, message: 'limit phải là số nguyên dương.' });
+        }
+        if (minPrice !== undefined && (typeof minPrice !== 'string' || !/^\d+(\.\d+)?$/.test(minPrice) || !Number.isFinite(Number(minPrice)))) {
+            return res.status(400).json({ success: false, message: 'minPrice phải là số không âm.' });
+        }
+
+        // Chặng 3: Nếu có query -> tính toán phân trang/lọc rồi truy vấn qua Mongoose
+        if (page !== undefined || limit !== undefined || minPrice !== undefined) {
+            const currentPage = page === undefined ? 1 : Number(page);
+            const pageSize = limit === undefined ? 10 : Number(limit);
+            const skip = (currentPage - 1) * pageSize;
+            if (!Number.isSafeInteger(skip)) {
+                return res.status(400).json({ success: false, message: 'page và limit quá lớn.' });
+            }
+            const filter = minPrice === undefined ? {} : { price: { $gte: Number(minPrice) } };
+            const total = await Product.countDocuments(filter);
+            const products = await Product.find(filter).sort({ createdAt: -1, _id: -1 }).skip(skip).limit(pageSize);
+
+            // Chặng 4: Trả về kết quả kèm metadata phân trang
+            return res.status(200).json({
+                success: true,
+                count: products.length,
+                data: products,
+                pagination: { page: currentPage, limit: pageSize, total, totalPages: Math.ceil(total / pageSize) }
+            });
+        }
+
+        // Trường hợp không truyền query -> lấy toàn bộ danh sách như mặc định
         const products = await Product.find().sort({ createdAt: -1 });
         res.status(200).json({
             success: true,
@@ -109,13 +146,13 @@ router.patch('/products/:id', async (req, res) => {
             });
         }
 
-        // { new: true }         → trả về document SAU khi cập nhật (không phải bản cũ)
+        // { returnDocument: 'after' } → trả về document SAU khi cập nhật
         // { runValidators: true } → kích hoạt validation của Schema khi update
         //                          (bắt lỗi nếu price âm, quantity âm, v.v.)
         const updatedProduct = await Product.findByIdAndUpdate(
             id,
             req.body,
-            { new: true, runValidators: true }
+            { returnDocument: 'after', runValidators: true }
         );
 
         if (!updatedProduct) {
