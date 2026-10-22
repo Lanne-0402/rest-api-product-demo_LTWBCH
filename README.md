@@ -13,6 +13,8 @@ Chức năng chính: **Tạo mới sản phẩm (`POST /api/products`)** và qu�
 ---
 ```text
 rest-api-product-demo/
+## Cấu trúc hệ thống
+```text
 ├── config/
 │   └── db.js            # Khởi tạo kết nối Mongoose đến MongoDB Atlas
 ├── models/
